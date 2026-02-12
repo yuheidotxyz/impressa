@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<title>impressa.ink</title>
+		<meta name="description" content="The story of you, written in 100 lines per page. Your profile is saved only in local storage." />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300..700&family=IBM+Plex+Sans:wght@300&family=IBM+Plex+Serif:ital,wght@0,400;1,300&family=Quicksand:wght@300..700&display=block" rel="stylesheet" />
+		<link href="https://cdn.jsdelivr.net/npm/open-props@1.7.23/colors.min.css" rel="stylesheet" />
+		<link rel="icon" href="https://cdn.jsdelivr.net/npm/lucide-static@0.563.0/icons/cog.svg" />
+		<script src="https://cdn.jsdelivr.net/npm/lucide@0.563.0/dist/umd/lucide.min.js" defer></script>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover" />
+		<meta name="color-scheme" content="light dark" />
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				border: none;
+			}
+
+			html {
+				font-size: calc(1.5vmin + 0.1rem);
+				--title-font: 'IBM Plex Serif', serif;
+				--label-font: 'IBM Plex Sans', sans-serif;
+				--head-font: 'Cormorant Garamond', serif;
+				--body-font: 'Quicksand', sans-serif;
+			}
+
+			body {
+				height: 100vh;
+				width: 100vw;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				font-family: var(--body-font);
+				color: light-dark(var(--gray-9), var(--stone-5));
+			}
+
+			body,
+			dialog {
+				background-color: light-dark(oklch(0.99 0.006 85), oklch(0.22 0 0));
+			}
+			#running-head {
+				h1 {
+					color: light-dark(var(--gray-7), var(--stone-6));
+				}
+				h2 {
+					color: light-dark(var(--gray-9), var(--stone-5));
+				}
+			}
+			dialog {
+				h1 {
+					color: light-dark(var(--gray-9), var(--stone-3));
+				}
+				label {
+					color: light-dark(var(--gray-10), var(--stone-5));
+				}
+				input,
+				input::placeholder,
+				select {
+					color: light-dark(var(--gray-9), var(--gray-0));
+				}
+				#btn-close {
+					color: light-dark(var(--stone-6), var(--gray-4));
+				}
+				#btn-save {
+					color: light-dark(var(--gray-9), var(--stone-3));
+				}
+			}
+			#settings-trigger,
+			#colon,
+			.readout-unit,
+			#standard-time,
+			body > footer {
+				color: light-dark(var(--gray-5), var(--stone-6));
+			}
+			.readout-value {
+				color: light-dark(var(--gray-9), var(--yellow-2));
+			}
+			#word-number::after {
+				color: light-dark(var(--gray-4), var(--stone-6));
+			}
+
+			.digit {
+				display: inline-block;
+				width: 0.6em;
+				text-align: center;
+			}
+
+			#settings-trigger {
+				position: fixed;
+				top: 6vh;
+				right: 6vw;
+				cursor: pointer;
+				background: transparent;
+				svg {
+					height: 2.1rem;
+					width: 2.1rem;
+				}
+			}
+
+			dialog {
+				margin: auto;
+				&::backdrop {
+					backdrop-filter: blur(1rem) invert(0.25);
+				}
+				padding-top: 2rem;
+				padding-bottom: 2rem;
+				padding-inline: 4rem;
+
+				#settings-form {
+					--accent: light-dark(var(--red-8), var(--pink-1));
+					display: flex;
+					flex-direction: column;
+					gap: 1.2rem;
+					* {
+						font-family: var(--title-font);
+					}
+					h1 {
+						font-style: italic;
+						text-align: center;
+						letter-spacing: 0.06em;
+						font-weight: 300;
+					}
+					label,
+					button {
+						font-family: var(--label-font);
+						font-weight: 300;
+						letter-spacing: 0.02em;
+					}
+					.row {
+						display: flex;
+						div {
+							flex: 1;
+						}
+						&:last-child {
+							margin-top: 0.8rem;
+							justify-content: center;
+							gap: 2rem;
+							button {
+								cursor: pointer;
+								font-size: 0.95rem;
+								background: none;
+							}
+						}
+					}
+					.form-group {
+						display: flex;
+						flex-direction: column;
+						label {
+							font-size: 0.7rem;
+						}
+						input,
+						select {
+							background: none;
+							outline: none;
+							border-bottom-width: 0.1em;
+							border-bottom-style: solid;
+							border-bottom-color: light-dark(var(--stone-2), var(--stone-3));
+						}
+						input {
+							cursor: text;
+						}
+						select {
+							cursor: pointer;
+						}
+						&:focus-within {
+							label {
+								color: var(--accent);
+							}
+							input,
+							select {
+								border-bottom-color: var(--accent);
+							}
+						}
+						.date-input-group {
+							display: flex;
+							.date-input {
+								display: flex;
+								flex-direction: column;
+								input {
+									appearance: textfield;
+									width: 0;
+									min-width: 100%;
+								}
+								label {
+									font-size: 0.6rem;
+								}
+							}
+						}
+					}
+				}
+			}
+
+			#running-head {
+				font-family: var(--head-font);
+				text-align: center;
+				h1 {
+					font-family: var(--title-font);
+					font-weight: 300;
+					font-style: italic;
+					font-size: 2rem;
+					letter-spacing: 0.15rem;
+				}
+				h2 {
+					font-size: 7rem;
+					font-weight: 600;
+					letter-spacing: 0.2rem;
+				}
+				p {
+					font-size: 4rem;
+					margin-bottom: 2rem;
+				}
+			}
+
+			#separator {
+				width: 8rem;
+				height: 0.05rem;
+				background-color: light-dark(oklch(0.86 0.02 278), oklch(0.56 0 0));
+				margin: 0 auto;
+			}
+
+			#manuscript-page {
+				display: flex;
+				align-items: baseline;
+
+				.readout {
+					flex: 1;
+
+					text-align: center;
+					font-weight: 500;
+					.readout-value {
+						font-size: 10rem;
+					}
+					.readout-unit {
+						font-size: 2.4rem;
+						margin-top: -0.5em;
+					}
+
+					&[data-count='1'] .plural-s {
+						visibility: hidden;
+					}
+				}
+
+				#colon {
+					font-size: 3.5rem;
+					margin: 0 2rem;
+				}
+			}
+
+			body > footer {
+				margin-top: 2rem;
+				font-size: 1.25rem;
+			}
+
+			#progress-bar {
+				position: fixed;
+				bottom: 0;
+				left: 0;
+				width: 100%;
+				height: 1vh;
+			}
+			progress {
+				--progress-bg-color: light-dark(oklch(0.9 0 0), oklch(0.42 0 0));
+				--progress-value-color: light-dark(oklch(0.77 0.052 18.5), oklch(0.7 0 0));
+				appearance: none;
+				background-color: var(--progress-bg-color);
+				&::-webkit-progress-bar {
+					background-color: var(--progress-bg-color);
+				}
+				&::-webkit-progress-value {
+					background-color: var(--progress-value-color);
+				}
+				&::-moz-progress-bar {
+					background-color: var(--progress-value-color);
+				}
+			}
+
+			#word-number::after {
+				content: '_';
+				position: absolute;
+			}
+			@media (prefers-reduced-motion: reduce) {
+				#word-number::after {
+					visibility: hidden;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<header>
+			<button id="settings-trigger" aria-label="Edit profile" command="show-modal" commandfor="settings-dialog">
+				<i data-lucide="clipboard-pen"></i>
+			</button>
+			<dialog id="settings-dialog">
+				<form method="dialog" id="settings-form">
+					<h1>Personalize</h1>
+					<div class="row">
+						<div class="form-group">
+							<label for="settings-name">NAME</label>
+							<input type="text" id="settings-name" placeholder="your name" />
+						</div>
+					</div>
+					<div class="row">
+						<div class="form-group" role="group" aria-labelledby="settings-origin">
+							<label id="settings-origin" for="settings-origin-year">ORIGIN (NATAL DAY)</label>
+							<div class="date-input-group">
+								<div class="date-input">
+									<label for="settings-origin-year">year</label>
+									<input type="number" id="settings-origin-year" placeholder="year" />
+								</div>
+								<div class="date-input">
+									<label for="settings-origin-month">month</label>
+									<input type="number" id="settings-origin-month" placeholder="month" min="1" />
+								</div>
+								<div class="date-input">
+									<label for="settings-origin-day">day</label>
+									<input type="number" id="settings-origin-day" placeholder="day" min="1" />
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="form-group">
+							<label for="settings-time-zone">TIME ZONE</label>
+							<select id="settings-time-zone"></select>
+						</div>
+					</div>
+					<div class="row">
+						<div class="form-group">
+							<label for="settings-calendar">CALENDAR</label>
+							<select id="settings-calendar"></select>
+						</div>
+					</div>
+					<div class="row">
+						<button type="button" id="btn-close" value="cancel" command="close" commandfor="settings-dialog">CLOSE</button>
+						<button type="submit" id="btn-save" value="save">SAVE</button>
+					</div>
+				</form>
+			</dialog>
+		</header>
+		<main style="user-select: none">
+			<header id="running-head">
+				<h1>The Story of <output id="name" for="settings-name"></output></h1>
+				<h2 role="timer">Chapter <output id="chapter-number" for="settings-origin-year settings-origin-month settings-origin-day settings-time-zone settings-calendar"></output></h2>
+				<p role="timer">Page <output id="page-number" for="settings-origin-year settings-origin-month settings-origin-day settings-time-zone settings-calendar"></output></p>
+			</header>
+			<div id="separator" role="separator"></div>
+			<div id="manuscript-page">
+				<div class="readout" id="line-meter" role="timer">
+					<output class="readout-value" id="line-number" for="settings-time-zone settings-calendar"></output>
+					<div class="readout-unit">LINE<span class="plural-s">S</span></div>
+				</div>
+				<div id="colon" role="separator">:</div>
+				<div class="readout" id="word-meter" role="timer">
+					<output class="readout-value" id="word-number" for="settings-time-zone settings-calendar"></output>
+					<div class="readout-unit">WORD<span class="plural-s">S</span></div>
+				</div>
+			</div>
+		</main>
+		<footer style="user-select: none">
+			<p role="timer">
+				Standard Time: <output for="settings-time-zone settings-calendar"><time id="standard-time"></time></output>
+			</p>
+			<div>
+				<output for="settings-time-zone settings-calendar"><progress id="progress-bar" aria-label="Current Page's Progress"></progress></output>
+			</div>
+		</footer>
+		<script>
+			'use strict';
+
+			const divmod = (dividend, divisor) => {
+				const quotient = Math.floor(dividend / divisor);
+				const remainder = dividend - divisor * quotient;
+				return { quotient, remainder };
+			};
+			const padZero = (num, length) => num.toString().padStart(length, '0');
+			const toMonoHTML = (str) => str.replace(/\d/g, '<span class="digit">$&</span>');
+
+			class QuietStorage {
+				static getItem(keyName) {
+					try {
+						return window.localStorage.getItem(keyName);
+					} catch (e) {
+						return null;
+					}
+				}
+				static setItem(keyName, keyValue) {
+					try {
+						window.localStorage.setItem(keyName, keyValue);
+					} catch (e) {}
+				}
+			}
+
+			const projectDate = (baseDate, duration) => {
+				for (let i = 0; i < 1000; i++) {
+					try {
+						return baseDate.subtract({ days: i }, { overflow: 'reject' }).add(duration, { overflow: 'reject' }).add({ days: i }, { overflow: 'reject' });
+					} catch (e) {
+						continue;
+					}
+				}
+				return baseDate.add(duration, { overflow: 'constrain' });
+			};
+
+			const nameElement = document.getElementById('name');
+			const chapterNumberElement = document.getElementById('chapter-number');
+			const pageNumberElement = document.getElementById('page-number');
+			const lineMeterElement = document.getElementById('line-meter');
+			const lineNumberElement = document.getElementById('line-number');
+			const wordMeterElement = document.getElementById('word-meter');
+			const wordNumberElement = document.getElementById('word-number');
+			const standardTimeElement = document.getElementById('standard-time');
+			const progressBarElement = document.getElementById('progress-bar');
+			const settingsDialogElement = document.getElementById('settings-dialog');
+			const settingsFormElement = document.getElementById('settings-form');
+			const settingsNameElement = document.getElementById('settings-name');
+			const settingsOriginYearElement = document.getElementById('settings-origin-year');
+			const settingsOriginMonthElement = document.getElementById('settings-origin-month');
+			const settingsOriginDayElement = document.getElementById('settings-origin-day');
+			const settingsTimeZoneElement = document.getElementById('settings-time-zone');
+			const settingsCalendarElement = document.getElementById('settings-calendar');
+
+			class Mundus {
+				static #timeZone;
+				static #calendar;
+				static get timeZone() {
+					return this.#timeZone;
+				}
+				static set timeZone(value) {
+					this.#timeZone = Intl.supportedValuesOf('timeZone').indexOf(value) !== -1 ? value : Temporal.Now.timeZoneId();
+					QuietStorage.setItem('settings-time-zone', this.#timeZone);
+				}
+				static get calendar() {
+					return this.#calendar;
+				}
+				static set calendar(value) {
+					this.#calendar = Intl.supportedValuesOf('calendar').indexOf(value) !== -1 ? value : 'iso8601';
+					QuietStorage.setItem('settings-calendar', this.#calendar);
+				}
+				static {
+					this.timeZone = QuietStorage.getItem('settings-time-zone');
+					this.calendar = QuietStorage.getItem('settings-calendar');
+				}
+			}
+
+			class Persona {
+				static #name;
+				static #origin;
+				static get name() {
+					return this.#name;
+				}
+				static set name(value) {
+					this.#name = typeof value === 'string' ? value : 'Them';
+					nameElement.textContent = this.#name;
+					QuietStorage.setItem('settings-name', this.#name);
+				}
+				static get origin() {
+					return this.#origin.withCalendar(Mundus.calendar);
+				}
+				static set origin(value) {
+					try {
+						this.#origin = Temporal.PlainDate.from(value, { overflow: 'reject' });
+					} catch (e) {
+						this.#origin = new Temporal.ZonedDateTime(0n, Mundus.timeZone, Mundus.calendar).toPlainDate();
+					}
+					QuietStorage.setItem('settings-origin', this.#origin.toString({ calendarName: 'always' }));
+				}
+				static {
+					this.name = QuietStorage.getItem('settings-name');
+					this.origin = QuietStorage.getItem('settings-origin');
+				}
+			}
+
+			class Personalize {
+				static reflect() {
+					settingsNameElement.value = Persona.name;
+					settingsTimeZoneElement.value = Mundus.timeZone;
+					settingsCalendarElement.value = Mundus.calendar;
+					const origin = Persona.origin;
+					settingsOriginYearElement.value = origin.year;
+					settingsOriginMonthElement.value = origin.month;
+					settingsOriginDayElement.value = origin.day;
+				}
+				static {
+					settingsTimeZoneElement.replaceChildren(...Intl.supportedValuesOf('timeZone').map((timeZone) => new Option(timeZone.replace(/_/g, ' '), timeZone, timeZone === Mundus.timeZone)));
+					settingsCalendarElement.replaceChildren(...Intl.supportedValuesOf('calendar').map((calendar) => new Option(calendar, calendar, calendar === Mundus.calendar)));
+					this.reflect();
+					settingsDialogElement.addEventListener('click', (event) => {
+						if (event.pointerType === 'mouse' || event.pointerType === 'pen') {
+							const dialogRect = settingsDialogElement.getBoundingClientRect();
+							if (!(dialogRect.left <= event.x && event.x <= dialogRect.right && dialogRect.top <= event.y && event.y <= dialogRect.bottom)) {
+								settingsDialogElement.close('backdrop');
+							}
+						}
+					});
+					settingsFormElement.addEventListener('submit', (event) => {
+						Persona.name = settingsNameElement.value;
+						Mundus.timeZone = settingsTimeZoneElement.value;
+						Mundus.calendar = settingsCalendarElement.value;
+						try {
+							const calendar = Mundus.calendar;
+							const year = Number(settingsOriginYearElement.value);
+							const month = Number(settingsOriginMonthElement.value);
+							const day = Number(settingsOriginDayElement.value);
+							Persona.origin = Temporal.PlainDate.from({ calendar, year, month, day }, { overflow: 'constrain' });
+						} catch (e) {
+							Persona.origin = null;
+						}
+						Carriage.adjust();
+						StandardTime.adjust();
+					});
+					settingsDialogElement.addEventListener('close', (event) => {
+						this.reflect();
+					});
+				}
+			}
+
+			class Typographus {
+				static get LINES_PER_PAGE() {
+					return 100;
+				}
+				static get WORDS_PER_LINE() {
+					return 100;
+				}
+				static get WORDS_PER_PAGE() {
+					return this.LINES_PER_PAGE * this.WORDS_PER_LINE;
+				}
+				static #bookmark = { origin: null, markedAt: null, chapter: null, page: null };
+				static #paginate(caretDate) {
+					const origin = Persona.origin;
+					if (!this.#bookmark.origin?.equals(origin) || !this.#bookmark.markedAt?.equals(caretDate)) {
+						this.#bookmark.origin = origin;
+						this.#bookmark.markedAt = caretDate;
+
+						const age = caretDate.since(origin, { largestUnit: 'years', smallestUnit: 'years', roundingMode: 'floor' }).years;
+						const incipit = projectDate(origin, { years: age });
+						this.#bookmark.chapter = age;
+						this.#bookmark.page = 1 + caretDate.since(incipit, { largestUnit: 'days', smallestUnit: 'days' }).days;
+					}
+					return { chapter: this.#bookmark.chapter, page: this.#bookmark.page };
+				}
+				static #measure(caretTime) {
+					const startOfDay = caretTime.startOfDay();
+					const endOfDay = startOfDay.add({ days: 1 });
+					const dayLengthMs = endOfDay.since(startOfDay, { largestUnit: 'milliseconds', smallestUnit: 'milliseconds', roundingMode: 'ceil' }).milliseconds;
+					const msPassed = caretTime.since(startOfDay, { largestUnit: 'milliseconds', smallestUnit: 'milliseconds', roundingMode: 'floor' }).milliseconds;
+					const wordLengthMs = dayLengthMs / this.WORDS_PER_PAGE;
+					const wordOffset = msPassed / wordLengthMs;
+					const { quotient: lines, remainder: wordOffsetInLine } = divmod(wordOffset, this.WORDS_PER_LINE);
+					const { quotient: words, remainder: wordProgress } = divmod(wordOffsetInLine, 1);
+					return { lines, words, wordProgress, wordLengthMs };
+				}
+				static compose() {
+					const caret = Temporal.Now.zonedDateTimeISO(Mundus.timeZone).withCalendar(Mundus.calendar);
+					return Object.assign({ time: caret }, this.#paginate(caret.toPlainDate()), this.#measure(caret));
+				}
+			}
+
+			class Carriage {
+				static #timeoutID;
+				static #blinkAnimation = new Animation(
+					new KeyframeEffect(
+						wordNumberElement,
+						[
+							{ opacity: 0, offset: 0, easing: 'step-start' },
+							{ opacity: 1, offset: 3 / 4, easing: 'step-start' },
+							{ opacity: 0, offset: 1 },
+						],
+						{ duration: 0, fill: 'both', iterations: Infinity, pseudoElement: '::after' },
+					),
+					document.timeline,
+				);
+				static adjust = () => {
+					window.clearTimeout(this.#timeoutID);
+
+					const caret = Typographus.compose();
+					const msUntilNextWord = (1 - caret.wordProgress) * caret.wordLengthMs;
+
+					chapterNumberElement.value = caret.chapter;
+
+					pageNumberElement.value = caret.page;
+
+					lineMeterElement.dataset.count = caret.lines;
+					lineNumberElement.innerHTML = toMonoHTML(padZero(caret.lines, (Typographus.LINES_PER_PAGE - 1).toString().length));
+
+					wordMeterElement.dataset.count = caret.words;
+					wordNumberElement.innerHTML = toMonoHTML(padZero(caret.words, (Typographus.WORDS_PER_LINE - 1).toString().length));
+
+					const blinkDurationMs = caret.wordLengthMs / 5;
+					this.#blinkAnimation.effect.updateTiming({ duration: blinkDurationMs });
+					this.#blinkAnimation.currentTime = blinkDurationMs - (msUntilNextWord % blinkDurationMs);
+
+					progressBarElement.max = Typographus.WORDS_PER_PAGE;
+					progressBarElement.value = Typographus.WORDS_PER_LINE * caret.lines + caret.words;
+
+					this.#timeoutID = window.setTimeout(this.adjust, msUntilNextWord + 1000 / 64);
+				};
+				static {
+					this.#blinkAnimation.play();
+					this.adjust();
+				}
+			}
+
+			class StandardTime {
+				static #timeoutID;
+				static adjust = () => {
+					window.clearTimeout(this.#timeoutID);
+
+					const currentTime = Temporal.Now.zonedDateTimeISO(Mundus.timeZone).withCalendar(Mundus.calendar).toPlainTime();
+					const currentTimeString = currentTime.toString({ smallestUnit: 'minute', roundingMode: 'floor' });
+					standardTimeElement.dateTime = currentTimeString;
+					standardTimeElement.innerHTML = toMonoHTML(currentTimeString);
+
+					this.#timeoutID = window.setTimeout(this.adjust, 60_000 - (currentTime.second * 1000 + currentTime.millisecond) + 1000 / 64);
+				};
+				static {
+					this.adjust();
+				}
+			}
+
+			document.addEventListener('DOMContentLoaded', () => {
+				lucide.createIcons();
+
+				const svgElement = lucide.createElement(lucide.icons.Cog, { stroke: 'light-dark(oklch(0.44 0.07 249), oklch(0.9 0.033 249))' });
+				const styleElement = document.createElement('style');
+				styleElement.textContent = `
+								@keyframes spin {
+									100% {
+										transform: rotate(1turn);
+									}
+								}
+								:root {
+									animation-name: spin;
+									animation-duration: ${(Temporal.Duration.from({ days: 1 }).round({ largestUnit: 'seconds', smallestUnit: 'seconds' }).seconds / Typographus.WORDS_PER_PAGE) * 10}s;
+									animation-timing-function: linear;
+									animation-iteration-count: infinite;
+									transform-origin: center;
+									color-scheme: light dark;
+								}
+							`;
+				svgElement.prepend(styleElement);
+				const svgString = new XMLSerializer().serializeToString(svgElement);
+				const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
+				const linkElement = document.createElement('link');
+				linkElement.rel = 'icon';
+				linkElement.href = URL.createObjectURL(svgBlob);
+				document.head.querySelector('link[rel~="icon"]')?.remove();
+				document.head.appendChild(linkElement);
+			});
+
+			class WakeLockApp {
+				static #sentinel = null;
+				static #request = async () => {
+					if (this.#sentinel?.released !== false && document.visibilityState === 'visible') {
+						this.#sentinel = await navigator.wakeLock.request('screen').catch(() => null);
+					}
+				};
+				static {
+					document.addEventListener('click', this.#request);
+					document.addEventListener('visibilitychange', this.#request);
+				}
+			}
+		</script>
+	</body>
+</html>
