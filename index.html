@@ -624,22 +624,22 @@
 				lucide.createIcons();
 
 				const svgElement = lucide.createElement(lucide.icons.Cog, { stroke: 'light-dark(oklch(0.44 0.07 249), oklch(0.9 0.033 249))' });
-				const styleElement = document.createElement('style');
+				const styleElement = document.createElementNS('http://www.w3.org/2000/svg', 'style');
 				styleElement.textContent = `
-								@keyframes spin {
-									100% {
-										transform: rotate(1turn);
-									}
-								}
-								:root {
-									animation-name: spin;
-									animation-duration: ${(Temporal.Duration.from({ days: 1 }).round({ largestUnit: 'seconds', smallestUnit: 'seconds' }).seconds / Typographus.WORDS_PER_PAGE) * 10}s;
-									animation-timing-function: linear;
-									animation-iteration-count: infinite;
-									transform-origin: center;
-									color-scheme: light dark;
-								}
-							`;
+					@keyframes spin {
+						100% {
+							transform: rotate(1turn);
+						}
+					}
+					:root {
+						animation-name: spin;
+						animation-duration: ${(Temporal.Duration.from({ days: 1 }).round({ largestUnit: 'seconds', smallestUnit: 'seconds' }).seconds / Typographus.WORDS_PER_PAGE) * 10}s;
+						animation-timing-function: linear;
+						animation-iteration-count: infinite;
+						transform-origin: center;
+						color-scheme: light dark;
+					}
+				`;
 				svgElement.prepend(styleElement);
 				const svgString = new XMLSerializer().serializeToString(svgElement);
 				const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
