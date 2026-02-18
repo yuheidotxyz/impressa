@@ -6,7 +6,7 @@
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300..700&family=IBM+Plex+Sans:wght@300&family=IBM+Plex+Serif:ital,wght@0,400;1,300&family=Quicksand:wght@300..700&display=block" rel="stylesheet" />
 		<link href="https://cdn.jsdelivr.net/npm/open-props@1.7.23/colors.min.css" rel="stylesheet" />
-		<link rel="icon" href="https://cdn.jsdelivr.net/npm/lucide-static@0.563.0/icons/cog.svg" />
+		<link rel="icon" href="https://cdn.jsdelivr.net/npm/lucide-static@0.563.0/icons/cog.svg" type="image/svg+xml" sizes="any" />
 		<link rel="canonical" href="https://impressa.ink/" />
 		<script src="https://cdn.jsdelivr.net/npm/lucide@0.563.0/dist/umd/lucide.min.js" defer></script>
 		<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover" />
@@ -646,6 +646,8 @@
 				const linkElement = document.createElement('link');
 				linkElement.rel = 'icon';
 				linkElement.href = URL.createObjectURL(svgBlob);
+				linkElement.type = svgBlob.type;
+				linkElement.sizes.value = 'any';
 				document.head.querySelector('link[rel~="icon"]')?.remove();
 				document.head.appendChild(linkElement);
 			});
